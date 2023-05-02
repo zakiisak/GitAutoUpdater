@@ -20,7 +20,7 @@ public class Main {
 		if(args.length > 0)
 		{
 			try {
-				executeCommand(launchCommand);
+				currentLaunchProcess = executeCommand(launchCommand, true);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -41,11 +41,11 @@ public class Main {
 					if(args.length > 0)
 					{
 						killExistingProcess();
-						currentLaunchProcess = executeCommand(launchCommand);
+						currentLaunchProcess = executeCommand(launchCommand, true);
 					}
 				}
 				
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			try {
@@ -56,23 +56,39 @@ public class Main {
 		}
 	}
 	
+	private static boolean isWindows() {
+		String os = System.getProperty("os.name");
+		return os.toLowerCase().contains("windows");
+	}
+	
 	
 	private static void killExistingProcess() {
+		System.out.println("Killing child process " + currentLaunchProcess);
 		if(currentLaunchProcess != null)
 		{
-			currentLaunchProcess.destroy();
+			try {
+				if(isWindows())
+					System.out.println(executeAndWaitFor("taskkill /PID " + currentLaunchProcess.pid()));
+				else System.out.println(executeAndWaitFor("kill -9 " + currentLaunchProcess.pid()));
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			
 			currentLaunchProcess = null;
 		}
 	}
 	
-	private static Process executeCommand(String command) throws IOException
+	private static Process executeCommand(String command, boolean inheritIO) throws IOException
 	{
 		System.out.println("Executing command: " + command);
 		String[] cmd = command.split(" ");
 		
 		ProcessBuilder ps=new ProcessBuilder(cmd);
 		ps.redirectErrorStream(true);
-		ps.inheritIO();
+		if(inheritIO)
+			ps.inheritIO();
 		
 		Process pr = ps.start();  
 		
@@ -83,7 +99,7 @@ public class Main {
 	private static String executeAndWaitFor(String command) throws IOException
 	{
 
-		Process pr = executeCommand(command);
+		Process pr = executeCommand(command, false);
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 		String line;
