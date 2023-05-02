@@ -56,20 +56,13 @@ public class Main {
 		}
 	}
 	
-	private static boolean isWindows() {
-		String os = System.getProperty("os.name");
-		return os.toLowerCase().contains("windows");
-	}
-	
 	
 	private static void killExistingProcess() {
 		System.out.println("Killing child process " + currentLaunchProcess);
 		if(currentLaunchProcess != null)
 		{
 			try {
-				if(isWindows())
-					System.out.println(executeAndWaitFor("taskkill /PID " + currentLaunchProcess.pid()));
-				else System.out.println(executeAndWaitFor("kill -9 " + currentLaunchProcess.pid()));
+				currentLaunchProcess.destroy();
 			}
 			catch(Exception e)
 			{
@@ -90,7 +83,7 @@ public class Main {
 		if(inheritIO)
 			ps.inheritIO();
 		
-		Process pr = ps.start();  
+		Process pr = ps.start();
 		
 		return pr;
 	}
