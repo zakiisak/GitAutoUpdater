@@ -9,12 +9,22 @@ public class Main {
 	
 	public static void main(String[] args)
 	{
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> killExistingProcess()));
+		
 		String launchCommand = "";
 		for(String s : args)
 		{
 			launchCommand += s + " ";
 		}
 		launchCommand = launchCommand.trim();
+		if(args.length > 0)
+		{
+			try {
+				executeCommand(launchCommand);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		while(true)
 		{
@@ -44,8 +54,8 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		 
 	}
+	
 	
 	private static void killExistingProcess() {
 		if(currentLaunchProcess != null)
@@ -57,10 +67,12 @@ public class Main {
 	
 	private static Process executeCommand(String command) throws IOException
 	{
+		System.out.println("Executing command: " + command);
 		String[] cmd = command.split(" ");
 		
 		ProcessBuilder ps=new ProcessBuilder(cmd);
 		ps.redirectErrorStream(true);
+		ps.inheritIO();
 		
 		Process pr = ps.start();  
 		
