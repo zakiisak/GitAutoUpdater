@@ -19,13 +19,13 @@ public class Main {
 		while(true)
 		{
 			try {
-				executeAndWaitFor("git remote update");
-				String statusOutput = executeAndWaitFor("git status");
-				System.out.println("Current status: " + statusOutput);
+				executeAndWaitFor("git fetch");
+				String localCurrentHash = executeAndWaitFor("git rev-parse --short HEAD");
+				String remoteCurrentHash = executeAndWaitFor("git rev-parse --short origin/master");
 				
-				if(statusOutput.toLowerCase().contains("your branch is behind"))
+				if(localCurrentHash.trim().equalsIgnoreCase(remoteCurrentHash.trim()) == false)
 				{
-					String output = executeAndWaitFor("git pull");
+					String output = executeAndWaitFor("git pull origin master");
 					System.out.println("updated from remote - " + output);
 					
 					if(args.length > 0)
